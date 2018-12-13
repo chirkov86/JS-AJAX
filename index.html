@@ -21,13 +21,12 @@
 
 <body>
 
-	<h2 id="weather_report_header"></h2>
-	<p id="weather_report"></p>
+	<p id="weather_report_today"></p>
+	<p id="weather_report_tomorrow"></p>
 
 	<script>
 
 		/* AJAX example */
-
 		// Using metaweather.com/api/
 		// woeid stands for "Where On Earth ID"
 		function getWeather(woeid) {
@@ -41,29 +40,48 @@
 				.then(data => {
 					// Get only current day from 5 days forecast
 					const today_weather_obj = data.consolidated_weather[0];
-					const desired_props = ['wind_direction_compass',
-						'applicable_date',
-						'min_temp',
-						'max_temp',
-						'the_temp',
-						'wind_speed',
-						'humidity'];
-					document.getElementById("weather_report_header").innerHTML = 'Current weather in Moscow:</br>';
-					let report = `<img src=https://www.metaweather.com/static/img/weather/ico/${today_weather_obj.weather_state_abbr}.ico></br>`
-					for (var prop in today_weather_obj) {
-						report += desired_props.indexOf(prop) !== -1
-							? prop + ' = ' + today_weather_obj[prop] + '</br>'
-							: '';
-					}
-					document.getElementById("weather_report").innerHTML = report;
+					document.getElementById("weather_report_today").innerHTML = '<h2>Current weather in Moscow:</h2>'
+					document.getElementById("weather_report_today").innerHTML += getPrintableWeatherObj(today_weather_obj);
 				})
 				.catch(err => {
 					console.log(err);
 				});
 		}
 
+		/*===============================*/
+		/* AJAX example with async/await */
+
+		async function getWeatherAsync(woeid) {
+			const result = await fetch(`https://cors-anywhere.herokuapp.com/https://www.metaweather.com/api/location/${woeid}/`);
+			// json() is async too, i.e. returns promise
+			const data = await result.json();
+			const tomorrow_weather_obj = data.consolidated_weather[1];
+			document.getElementById("weather_report_tomorrow").innerHTML = '<h2>Tomorrow weather in Moscow:</h2>'
+			document.getElementById("weather_report_tomorrow").innerHTML += getPrintableWeatherObj(tomorrow_weather_obj);
+		}
+
 		// 2122265 stands for Moscow
 		getWeather(2122265);
+		getWeatherAsync(2122265);
+
+		const getPrintableWeatherObj = weatherObj => {
+			const desired_props = ['wind_direction_compass',
+				'applicable_date',
+				'min_temp',
+				'max_temp',
+				'the_temp',
+				'wind_speed',
+				'humidity'];
+			let report = `<img src=https://www.metaweather.com/static/img/weather/ico/${weatherObj.weather_state_abbr}.ico></br>`
+			for (var prop in weatherObj) {
+				report += desired_props.indexOf(prop) !== -1
+					? prop + ' = ' + weatherObj[prop] + '</br>'
+					: '';
+			}
+			return report;
+		}
+
+
 
 	</script>
 </body>

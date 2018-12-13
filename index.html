@@ -1,0 +1,71 @@
+<html>
+
+<head>
+	<title>AJAX weather forecast</title>
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans|Roboto" rel="stylesheet">
+	<style>
+		h2 {
+			font-family: 'Open Sans', sans-serif;
+			font-size: 22px;
+			/* font-size: 16px; */
+		}
+
+		p {
+			font-family: 'Roboto', sans-serif;
+			font-size: 16px;
+			/* font-size: 11px; */
+			line-height: 1.6;
+		}
+	</style>
+</head>
+
+<body>
+
+	<h2 id="weather_report_header"></h2>
+	<p id="weather_report"></p>
+
+	<script>
+
+		/* AJAX example */
+
+		// Using metaweather.com/api/
+		// woeid stands for "Where On Earth ID"
+		function getWeather(woeid) {
+			// fetch() allows network requests similar to XMLHttpRequest
+			// Use CORS proxy to deal with CORS
+			fetch(`https://cors-anywhere.herokuapp.com/https://www.metaweather.com/api/location/${woeid}/`)
+				.then(result => {
+					// Need to JSONify ReadableStream
+					return result.json();
+				})
+				.then(data => {
+					// Get only current day from 5 days forecast
+					const today_weather_obj = data.consolidated_weather[0];
+					const desired_props = ['wind_direction_compass',
+						'applicable_date',
+						'min_temp',
+						'max_temp',
+						'the_temp',
+						'wind_speed',
+						'humidity'];
+					document.getElementById("weather_report_header").innerHTML = 'Current weather in Moscow:</br>';
+					let report = `<img src=https://www.metaweather.com/static/img/weather/ico/${today_weather_obj.weather_state_abbr}.ico></br>`
+					for (var prop in today_weather_obj) {
+						report += desired_props.indexOf(prop) !== -1
+							? prop + ' = ' + today_weather_obj[prop] + '</br>'
+							: '';
+					}
+					document.getElementById("weather_report").innerHTML = report;
+				})
+				.catch(err => {
+					console.log(err);
+				});
+		}
+
+		// 2122265 stands for Moscow
+		getWeather(2122265);
+
+	</script>
+</body>
+
+</html>

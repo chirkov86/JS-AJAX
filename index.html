@@ -21,6 +21,11 @@
 
 <body>
 
+	<p id="test">
+		<div style="padding: 15px; width: 170px; display: inline-block;">Main thread is running:</div>
+		<div class="ticker" style="padding: 15px; background-color: #BCC6CC; width: 15px; display: inline-block;">
+		</div>
+	</p>
 	<p id="weather_report_today"></p>
 	<p id="weather_report_tomorrow"></p>
 
@@ -28,10 +33,10 @@
 
 		/* AJAX example */
 		// Using metaweather.com/api/
-		// woeid stands for "Where On Earth ID"
 		function getWeather(woeid) {
 			// fetch() allows network requests similar to XMLHttpRequest
 			// Use CORS proxy to deal with CORS
+			// woeid stands for "Where On Earth ID"
 			fetch(`https://cors-anywhere.herokuapp.com/https://www.metaweather.com/api/location/${woeid}/`)
 				.then(result => {
 					// Need to JSONify ReadableStream
@@ -40,11 +45,11 @@
 				.then(data => {
 					// Get only current day from 5 days forecast
 					const today_weather_obj = data.consolidated_weather[0];
-					document.getElementById("weather_report_today").innerHTML = '<h2>Current weather in Moscow:</h2>'
+					document.getElementById("weather_report_today").innerHTML = '<h2>Today weather in Moscow:</h2>'
 					document.getElementById("weather_report_today").innerHTML += getPrintableWeatherObj(today_weather_obj);
 				})
 				.catch(err => {
-					console.log(err);
+					alert(err);
 				});
 		}
 
@@ -52,14 +57,28 @@
 		/* AJAX example with async/await */
 
 		async function getWeatherAsync(woeid) {
-			const result = await fetch(`https://cors-anywhere.herokuapp.com/https://www.metaweather.com/api/location/${woeid}/`);
-			// json() is async too, i.e. returns promise
-			const data = await result.json();
-			const tomorrow_weather_obj = data.consolidated_weather[1];
-			document.getElementById("weather_report_tomorrow").innerHTML = '<h2>Tomorrow weather in Moscow:</h2>'
-			document.getElementById("weather_report_tomorrow").innerHTML += getPrintableWeatherObj(tomorrow_weather_obj);
+			try {
+				const result = await fetch(`https://cors-anywhere.herokuapp.com/https://www.metaweather.com/api/location/${woeid}/`);
+				// json() is async too, i.e. returns promise
+				const data = await result.json();
+				const tomorrow_weather_obj = data.consolidated_weather[1];
+				document.getElementById("weather_report_tomorrow").innerHTML = '<h2>Tomorrow weather in Moscow:</h2>'
+				document.getElementById("weather_report_tomorrow").innerHTML += getPrintableWeatherObj(tomorrow_weather_obj);
+			} catch (error) {
+				alert(error);
+			}
 		}
 
+		const mainThreadTicker = () => {
+			const arr = ['-', '\\', '|', '/'];
+			let i = 0;
+			setInterval(() => {
+				document.querySelector('.ticker').textContent = arr[i];
+				i = i < arr.length - 1 ? i + 1 : 0;
+			}, 300);
+		}
+
+		mainThreadTicker();
 		// 2122265 stands for Moscow
 		getWeather(2122265);
 		getWeatherAsync(2122265);
@@ -80,8 +99,6 @@
 			}
 			return report;
 		}
-
-
 
 	</script>
 </body>

@@ -1,5 +1,5 @@
 # JS-AJAX
-JS-AJAX Description 
+Javascript AJAX study task.
 
 Script in `index.html` asynchronously loads the weather forecast in Moscow for:
 - today with help of `.then(..)` chaining
